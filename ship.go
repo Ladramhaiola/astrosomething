@@ -5,7 +5,6 @@ import (
 
 	"github.com/fogleman/gg"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 var shipImage *ebiten.Image
@@ -13,10 +12,9 @@ var shipImage *ebiten.Image
 const (
 	width  = 60
 	height = 60
-
-	maxAngle = 360
 )
 
+// TODO: check ebiten's vector graphics
 func init() {
 	dc := gg.NewContext(width, height)
 	dc.MoveTo(30, 0)
@@ -52,14 +50,15 @@ func NewShip(x, y float64, acceleration int) *Ship {
 	}
 }
 
+// ebiten assumes Update is called at 60 TPS so `dt` should theoretically be constant
 func (s *Ship) Update() {
-	if inpututil.KeyPressDuration(ebiten.KeyD) >= 1 {
+	if ebiten.IsKeyPressed(ebiten.KeyD) {
 		s.Angle += s.Rotation / 60.
 	}
-	if inpututil.KeyPressDuration(ebiten.KeyA) >= 1 {
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		s.Angle -= s.Rotation / 60.
 	}
-	if inpututil.KeyPressDuration(ebiten.KeyW) >= 1 {
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
 		// acceleration vector
 		vxDt := math.Cos(s.Angle) * float64(s.Acceleration/60)
 		vyDt := math.Sin(s.Angle) * float64(s.Acceleration/60)
@@ -74,7 +73,7 @@ func (s *Ship) Update() {
 	s.VX -= s.VX / 60.
 	s.VY -= s.VY / 60.
 
-	// clip ship
+	// clip ship movement
 	if s.X < 0 {
 		s.X += screenWidth
 	}
@@ -92,8 +91,11 @@ func (s *Ship) Update() {
 func (s *Ship) Draw(screen *ebiten.Image) {
 	op := ebiten.DrawImageOptions{}
 
+	// translate to image center
 	op.GeoM.Translate(-width/2, -height/2)
+	// rotate image
 	op.GeoM.Rotate(s.Angle + math.Pi/2)
+	// move to current ship position in game world
 	op.GeoM.Translate(s.X, s.Y)
 	op.Filter = ebiten.FilterLinear
 
