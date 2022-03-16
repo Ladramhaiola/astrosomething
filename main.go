@@ -12,19 +12,37 @@ const (
 	screenWidth, screenHeight = 800, 600
 )
 
+type ObjectType uint16
+
+const (
+	OIgnored ObjectType = iota
+	OShip
+	OBullet
+)
+
+type ObjectPool[T Ship | Bullet] []*T
+
 type Game struct {
-	Player *Ship
+	Player     *Ship
+	BulletPool ObjectPool[Bullet]
 }
 
 func (g *Game) Update() error {
 	g.Player.Update()
+
+	for _, b := range g.BulletPool {
+		b.Update()
+	}
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS()))
-
 	g.Player.Draw(screen)
+
+	for _, b := range g.BulletPool {
+		b.Draw(screen)
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -33,7 +51,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
 	game := Game{
-		Player: NewShip(screenWidth/2, screenHeight/2, 300),
+		Player:     NewShip(screenWidth/2, screenHeight/2, 300),
+		BulletPool: make(ObjectPool[Bullet], 0),
 	}
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)

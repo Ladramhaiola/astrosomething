@@ -39,6 +39,8 @@ type Ship struct {
 	VX, VY float64
 
 	Acceleration int
+
+	ObjectType ObjectType
 }
 
 func NewShip(x, y float64, acceleration int) *Ship {
@@ -47,6 +49,7 @@ func NewShip(x, y float64, acceleration int) *Ship {
 		Y:            y,
 		Acceleration: acceleration,
 		Rotation:     math.Pi,
+		ObjectType:   OShip,
 	}
 }
 
