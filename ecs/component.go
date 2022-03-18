@@ -16,8 +16,8 @@ type ComponentManger struct {
 	nextComponentType ComponentType
 }
 
-func RegisterComponent[T any](cm *ComponentManger, t T) {
-	name := reflect.TypeOf(t).String()
+func registerComponent[T any](cm *ComponentManger) {
+	name := reflect.TypeOf((*T)(nil)).String()
 
 	if _, ok := cm.componentArrays[name]; ok {
 		return
@@ -31,8 +31,8 @@ func RegisterComponent[T any](cm *ComponentManger, t T) {
 	cm.nextComponentType++
 }
 
-func GetComponentType[T any](cm *ComponentManger, t T) ComponentType {
-	name := reflect.TypeOf(t).String()
+func getComponentType[T any](cm *ComponentManger) ComponentType {
+	name := reflect.TypeOf((*T)(nil)).String()
 
 	componentType, ok := cm.componentTypes[name]
 	if !ok {
@@ -42,23 +42,23 @@ func GetComponentType[T any](cm *ComponentManger, t T) ComponentType {
 	return componentType
 }
 
-func AddComponent[T any](cm *ComponentManger, entity Entity, component T) {
+func addComponent[T any](cm *ComponentManger, entity Entity, component T) {
 	// Add a component to the array for an entity
-	GetComponentArray(cm, component).Insert(entity, component)
+	getComponentArray[T](cm).Insert(entity, component)
 }
 
-func RemoveComponent[T any](cm *ComponentManger, component T, entity Entity) {
+func removeComponent[T any](cm *ComponentManger, entity Entity) {
 	// Remove a component from the array for an entity
-	GetComponentArray(cm, component).Remove(entity)
+	getComponentArray[T](cm).Remove(entity)
 }
 
-func GetComponent[T any](cm *ComponentManger, component T, entity Entity) T {
+func getComponent[T any](cm *ComponentManger, entity Entity) T {
 	// Get a reference to a component from the array for an entity
-	return GetComponentArray(cm, component).Get(entity)
+	return getComponentArray[T](cm).Get(entity)
 }
 
-func GetComponentArray[T any](cm *ComponentManger, t T) *ComponentArray[T] {
-	name := reflect.TypeOf(t).String()
+func getComponentArray[T any](cm *ComponentManger) *ComponentArray[T] {
+	name := reflect.TypeOf((*T)(nil)).String()
 
 	array, ok := cm.componentArrays[name]
 	if !ok {
@@ -71,7 +71,8 @@ func GetComponentArray[T any](cm *ComponentManger, t T) *ComponentArray[T] {
 
 func NewComponentManager() *ComponentManger {
 	return &ComponentManger{
-		componentTypes:  make(map[string]ComponentType),
-		componentArrays: make(map[string]any, MaxComponents),
+		componentTypes:    make(map[string]ComponentType),
+		componentArrays:   make(map[string]any, MaxComponents),
+		nextComponentType: 1,
 	}
 }
