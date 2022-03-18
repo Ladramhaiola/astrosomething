@@ -1,4 +1,4 @@
-package ecs
+package bitmap
 
 import (
 	"golang.org/x/exp/constraints"

@@ -1,59 +1,75 @@
 package ecs
 
+import (
+	bitmap "asteroids/bits"
+)
+
+// Coordinator is responsible for game world
 type Coordinator struct {
 	componentManager *ComponentManger
 	entiryManager    *EntityManager
 	systemManager    *SystemManager
 }
 
-func (c *Coordinator) CreateEntity() Entity {
-	return c.entiryManager.CreateEntity()
+func CreateEntity() Entity {
+	return engine.entiryManager.CreateEntity()
 }
 
-// TODO: destroy entity
-
-func RegisterComponent[T any](c *Coordinator) {
-	registerComponent[T](c.componentManager)
+func DestroyEntity(entity Entity) {
+	engine.entiryManager.DestroyEntity(entity)
+	engine.componentManager.EntityDestroyed(entity)
+	engine.systemManager.EntityDestroyed(entity)
 }
 
-func AddComponent[T any](c *Coordinator, entity Entity, component T) {
-	addComponent(c.componentManager, entity, component)
-
-	signature := c.entiryManager.GetSignature(entity)
-
-	signature = SetBit(signature, Signature(getComponentType[T](c.componentManager)))
-	c.entiryManager.SetSignature(entity, signature)
-
-	// notify signature changed
-	c.systemManager.EntitySignatureChanged(entity, signature)
+func RegisterComponent[T any]() {
+	registerComponent[T](engine.componentManager)
 }
 
-func RemoveComponent[T any](c *Coordinator, entity Entity) {
-	removeComponent[T](c.componentManager, entity)
+func AddComponent[T any](entity Entity, component T) {
+	addComponent(engine.componentManager, entity, component)
 
-	signature := c.entiryManager.GetSignature(entity)
+	signature := engine.entiryManager.GetSignature(entity)
 
-	signature = SetBit(signature, Signature(getComponentType[T](c.componentManager)))
-	c.entiryManager.SetSignature(entity, signature)
+	// calculate updated signature
+	signature = bitmap.SetBit(
+		signature,
+		Signature(getComponentType[T](engine.componentManager)),
+	)
+	engine.entiryManager.SetSignature(entity, signature)
 
-	// notify signature changed
-	c.systemManager.EntitySignatureChanged(entity, signature)
+	// notify systems about changed signature
+	engine.systemManager.EntitySignatureChanged(entity, signature)
 }
 
-func GetComponent[T any](c *Coordinator, entity Entity) T {
-	return getComponent[T](c.componentManager, entity)
+func RemoveComponent[T any](entity Entity) {
+	removeComponent[T](engine.componentManager, entity)
+
+	signature := engine.entiryManager.GetSignature(entity)
+
+	signature = bitmap.SetBit(
+		signature,
+		Signature(getComponentType[T](engine.componentManager)),
+	)
+	engine.entiryManager.SetSignature(entity, signature)
+
+	// notify systems about changed signature
+	engine.systemManager.EntitySignatureChanged(entity, signature)
 }
 
-func GetComponentType[T any](c *Coordinator) ComponentType {
-	return getComponentType[T](c.componentManager)
+func GetComponent[T any](entity Entity) T {
+	return getComponent[T](engine.componentManager, entity)
 }
 
-func RegisterSystem(c *Coordinator, s System) {
-	registerSystem(c.systemManager, s)
+func GetComponentType[T any]() ComponentType {
+	return getComponentType[T](engine.componentManager)
 }
 
-func SetSystemSignature[T System](c *Coordinator, signature Signature) {
-	setSignature[T](c.systemManager, signature)
+func RegisterSystem(s System) {
+	engine.systemManager.RegisterSystem(s)
+}
+
+func SetSystemSignature[T System](signature Signature) {
+	setSignature[T](engine.systemManager, signature)
 }
 
 func NewCoordinator() *Coordinator {

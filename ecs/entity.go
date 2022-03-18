@@ -1,15 +1,6 @@
 package ecs
 
-type (
-	Entity        uint32
-	ComponentType uint8
-	Signature     uint32
-)
-
-var (
-	MaxEntities   = 500
-	MaxComponents = 32
-)
+// TODO: handle corner cases
 
 type EntityManager struct {
 	queue Queue // queue of unused entity IDs
@@ -51,6 +42,7 @@ func NewEntityManager() *EntityManager {
 	q := NewQueue()
 
 	// brain dead solution for now
+	// TODO: consider fast queue implementation
 	for i := 0; i <= MaxEntities; i++ {
 		q.Add(Entity(i))
 	}

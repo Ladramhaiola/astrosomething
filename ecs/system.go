@@ -4,8 +4,27 @@ import (
 	"reflect"
 )
 
+type BaseSystem struct {
+	Entities map[Entity]struct{}
+}
+
+func (s *BaseSystem) Insert(entity Entity) {
+	if s.Entities == nil {
+		s.Entities = make(map[Entity]struct{})
+	}
+	s.Entities[entity] = struct{}{}
+}
+
+func (s *BaseSystem) Remove(entiry Entity) {
+	if s.Entities == nil {
+		s.Entities = make(map[Entity]struct{})
+	}
+	delete(s.Entities, entiry)
+}
+
 type System interface {
-	Update(*Coordinator)
+	Update()
+
 	Insert(Entity)
 	Remove(Entity)
 }
@@ -17,7 +36,7 @@ type SystemManager struct {
 	systems map[string]System // TODO: use pointer or hack with types
 }
 
-func registerSystem(sm *SystemManager, s System) {
+func (sm *SystemManager) RegisterSystem(s System) {
 	name := reflect.TypeOf(s).String()
 
 	if _, ok := sm.systems[name]; ok {
@@ -28,8 +47,14 @@ func registerSystem(sm *SystemManager, s System) {
 }
 
 func setSignature[T System](sm *SystemManager, signature Signature) {
-	name := reflect.TypeOf((*T)(nil)).String()
+	name := reflect.TypeOf((*T)(nil)).Elem().String()
 	sm.signatures[name] = signature
+}
+
+func (sm *SystemManager) EntityDestroyed(entity Entity) {
+	for _, system := range sm.systems {
+		system.Remove(entity)
+	}
 }
 
 func (sm *SystemManager) EntitySignatureChanged(entity Entity, entitySignature Signature) {

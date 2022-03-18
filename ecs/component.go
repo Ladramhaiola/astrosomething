@@ -1,17 +1,23 @@
 package ecs
 
 import (
+	"fmt"
+	"log"
 	"reflect"
 )
 
 // TODO: unit tests
+// TODO: better interface
+type PackedArray interface {
+	Remove(entity Entity)
+}
 
 type ComponentManger struct {
 	// TODO: strings are kinda bad keys for performance
 	// Map from type string pointer to a component type
 	componentTypes map[string]ComponentType
 	// Map from type string pointer to a component array
-	componentArrays map[string]any
+	componentArrays map[string]PackedArray
 	// The component type to be assigned to the next registered component - starting at 0
 	nextComponentType ComponentType
 }
@@ -20,6 +26,7 @@ func registerComponent[T any](cm *ComponentManger) {
 	name := reflect.TypeOf((*T)(nil)).String()
 
 	if _, ok := cm.componentArrays[name]; ok {
+		log.Printf("component already registered: %s\n", name)
 		return
 	}
 
@@ -36,7 +43,7 @@ func getComponentType[T any](cm *ComponentManger) ComponentType {
 
 	componentType, ok := cm.componentTypes[name]
 	if !ok {
-		panic("unknown component type")
+		panic(fmt.Sprintf("unknown component type %s", name))
 	}
 	// Return this component's type - used for creating signatures
 	return componentType
@@ -67,12 +74,16 @@ func getComponentArray[T any](cm *ComponentManger) *ComponentArray[T] {
 	return array.(*ComponentArray[T])
 }
 
-// TODO: EntityDestroyed
+func (cm *ComponentManger) EntityDestroyed(entity Entity) {
+	for _, component := range cm.componentArrays {
+		component.Remove(entity)
+	}
+}
 
 func NewComponentManager() *ComponentManger {
 	return &ComponentManger{
 		componentTypes:    make(map[string]ComponentType),
-		componentArrays:   make(map[string]any, MaxComponents),
+		componentArrays:   make(map[string]PackedArray, MaxComponents),
 		nextComponentType: 1,
 	}
 }

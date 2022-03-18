@@ -1,102 +1,100 @@
-package ecs
+package ecs_test
 
 import (
+	bitmap "asteroids/bits"
+	"asteroids/ecs"
 	"fmt"
 	"testing"
 )
 
-type Set struct {
-	enitities map[Entity]struct{}
+// TODO: API improvements & Rendering API & priority queue & parallel systems
+// and complex querying
+
+type Position struct {
+	X, Y float64
 }
 
-func (s *Set) Insert(e Entity) {
-	s.enitities[e] = struct{}{}
+type Velocity struct {
+	X, Y float64
 }
 
-func (s *Set) Remove(e Entity) {
-	delete(s.enitities, e)
+type Acceleration struct {
+	Angle float64
+	Speed int
 }
+
+type Sprite struct{}
 
 type PhysicsSystem struct {
-	*Set
+	*ecs.BaseSystem
 }
 
-type Gravity struct {
-	Force float64
-}
+func (s *PhysicsSystem) Update() {
+	for entity := range s.BaseSystem.Entities {
+		position := ecs.GetComponent[*Position](entity)
+		velocity := ecs.GetComponent[*Velocity](entity)
 
-type RigidBody struct {
-	Velocity     [2]float64
-	Acceleration [2]float64
-}
-
-type Transform struct {
-	Position [2]float64
-	Rotation [2]float64
-	Scale    [2]float64
-}
-
-func (s *PhysicsSystem) Update(c *Coordinator) {
-	for e := range s.enitities {
-		rigidBody := GetComponent[*RigidBody](c, e)
-		gravity := GetComponent[*Gravity](c, e)
-
-		fmt.Println(rigidBody)
-		fmt.Println(gravity)
-
-		rigidBody.Velocity[1] -= gravity.Force
+		position.X += velocity.X / 60.
+		position.Y += velocity.Y / 60.
 	}
 }
 
-type PositionSystem struct {
-	*Set
+type RenderSystem struct {
+	*ecs.BaseSystem
 }
 
-func (s *PositionSystem) Update(c *Coordinator) {
-	for e := range s.enitities {
-		transform := GetComponent[*Transform](c, e)
-		fmt.Println("transform", transform)
+func (s *RenderSystem) Update() {
+	for entity := range s.BaseSystem.Entities {
+		position := ecs.GetComponent[*Position](entity)
+		_ = ecs.GetComponent[*Sprite](entity)
+
+		fmt.Printf("drawing sprite at %v\n", position)
 	}
 }
 
-func TestCoordinatorFlow(t *testing.T) {
-	c := NewCoordinator()
+func TestEngine(t *testing.T) {
+	ecs.RegisterComponent[*Position]()
+	ecs.RegisterComponent[*Velocity]()
+	ecs.RegisterComponent[*Acceleration]()
+	ecs.RegisterComponent[*Sprite]()
 
-	RegisterComponent[*Gravity](c)
-	RegisterComponent[*RigidBody](c)
-	RegisterComponent[*Transform](c)
+	var signature ecs.Signature
+	signature = bitmap.SetBit(
+		signature,
+		ecs.Signature(ecs.GetComponentType[*Position]()),
+	)
+	signature = bitmap.SetBit(
+		signature,
+		ecs.Signature(ecs.GetComponentType[*Velocity]()),
+	)
 
-	var signature Signature
-	signature = SetBit(signature, Signature(GetComponentType[*Gravity](c)))
-	signature = SetBit(signature, Signature(GetComponentType[*RigidBody](c)))
-	signature = SetBit(signature, Signature(GetComponentType[*Transform](c)))
+	physicsSystem := &PhysicsSystem{&ecs.BaseSystem{}}
+	ecs.RegisterSystem(physicsSystem)
+	ecs.SetSystemSignature[*PhysicsSystem](signature)
 
-	physicsSystem := &PhysicsSystem{&Set{enitities: make(map[Entity]struct{})}}
-	RegisterSystem(c, physicsSystem)
-	SetSystemSignature[*PhysicsSystem](c, signature)
+	entities := make([]ecs.Entity, 10)
 
-	positionSystem := &PositionSystem{&Set{enitities: make(map[Entity]struct{})}}
-	RegisterSystem(c, positionSystem)
-	SetSystemSignature[*PositionSystem](c, Signature(GetComponentType[*Transform](c)))
-
-	entities := make([]Entity, 2)
+	renderSystem := &RenderSystem{&ecs.BaseSystem{}}
+	ecs.RegisterSystem(renderSystem)
+	ecs.SetSystemSignature[*RenderSystem](bitmap.SetBit(
+		ecs.Signature(ecs.GetComponentType[*Position]()),
+		ecs.Signature(ecs.GetComponentType[*Sprite]()),
+	))
 
 	for i := range entities {
-		entity := c.CreateEntity()
+		entity := ecs.CreateEntity()
 
 		entities[i] = entity
 
-		AddComponent(c, entity, &Gravity{Force: 0.5})
-		AddComponent(c, entity, &RigidBody{
-			Velocity:     [2]float64{2.0, 2.0},
-			Acceleration: [2]float64{3.0, 3.0},
-		})
+		ecs.AddComponent(entity, &Position{X: 2, Y: 10})
+		ecs.AddComponent(entity, &Velocity{X: 3, Y: 4})
+		ecs.AddComponent(entity, &Acceleration{Angle: 32, Speed: 200})
+
+		if i%2 == 0 {
+			ecs.AddComponent(entity, &Sprite{})
+		}
 	}
 
-	AddComponent(c, c.CreateEntity(), &Transform{Scale: [2]float64{56, 45}})
-
-	fmt.Println(physicsSystem)
-	physicsSystem.Update(c)
-	physicsSystem.Update(c)
-	positionSystem.Update(c)
+	physicsSystem.Update()
+	renderSystem.Update()
 }

@@ -1,6 +1,8 @@
 package ecs
 
-// TODO: entity destriyed event system
+import "fmt"
+
+// TODO: entity destroyed event system
 // TODO: consider component array sizes
 
 type ComponentArray[T any] struct {
@@ -19,6 +21,7 @@ type ComponentArray[T any] struct {
 
 func (ca *ComponentArray[T]) Insert(entity Entity, component T) {
 	// TODO: do nothing on repeating inserts
+	fmt.Printf("[DEBUG] ComponentArray.Insert: %d\n", entity)
 	index := ca.size
 
 	ca.entityToIndex[entity] = index
