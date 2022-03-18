@@ -1,7 +1,6 @@
 package ecs_test
 
 import (
-	bitmap "asteroids/bits"
 	"asteroids/ecs"
 	"fmt"
 	"testing"
@@ -25,9 +24,7 @@ type Acceleration struct {
 
 type Sprite struct{}
 
-type PhysicsSystem struct {
-	*ecs.BaseSystem
-}
+type PhysicsSystem struct{ *ecs.BaseSystem }
 
 func (s *PhysicsSystem) Update() {
 	for entity := range s.BaseSystem.Entities {
@@ -39,9 +36,7 @@ func (s *PhysicsSystem) Update() {
 	}
 }
 
-type RenderSystem struct {
-	*ecs.BaseSystem
-}
+type RenderSystem struct{ *ecs.BaseSystem }
 
 func (s *RenderSystem) Update() {
 	for entity := range s.BaseSystem.Entities {
@@ -58,28 +53,23 @@ func TestEngine(t *testing.T) {
 	ecs.RegisterComponent[*Acceleration]()
 	ecs.RegisterComponent[*Sprite]()
 
-	var signature ecs.Signature
-	signature = bitmap.SetBit(
-		signature,
-		ecs.Signature(ecs.GetComponentType[*Position]()),
-	)
-	signature = bitmap.SetBit(
-		signature,
-		ecs.Signature(ecs.GetComponentType[*Velocity]()),
+	signature := ecs.SignatureFromComponentTypes(
+		ecs.GetComponentType[*Position](),
+		ecs.GetComponentType[*Velocity](),
 	)
 
 	physicsSystem := &PhysicsSystem{&ecs.BaseSystem{}}
 	ecs.RegisterSystem(physicsSystem)
-	ecs.SetSystemSignature[*PhysicsSystem](signature)
-
-	entities := make([]ecs.Entity, 10)
+	ecs.SetSystemSignature(physicsSystem, signature)
 
 	renderSystem := &RenderSystem{&ecs.BaseSystem{}}
 	ecs.RegisterSystem(renderSystem)
-	ecs.SetSystemSignature[*RenderSystem](bitmap.SetBit(
-		ecs.Signature(ecs.GetComponentType[*Position]()),
-		ecs.Signature(ecs.GetComponentType[*Sprite]()),
+	ecs.SetSystemSignature(renderSystem, ecs.SignatureFromComponentTypes(
+		ecs.GetComponentType[*Position](),
+		ecs.GetComponentType[*Sprite](),
 	))
+
+	entities := make([]ecs.Entity, 10)
 
 	for i := range entities {
 		entity := ecs.CreateEntity()

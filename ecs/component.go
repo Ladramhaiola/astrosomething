@@ -69,7 +69,7 @@ func getComponentArray[T any](cm *ComponentManger) *ComponentArray[T] {
 
 	array, ok := cm.componentArrays[name]
 	if !ok {
-		panic("call to unregistered component array")
+		panic(fmt.Sprintf("call to unregistered component array: %s\n", name))
 	}
 	return array.(*ComponentArray[T])
 }

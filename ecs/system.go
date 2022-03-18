@@ -46,8 +46,8 @@ func (sm *SystemManager) RegisterSystem(s System) {
 	sm.systems[name] = s
 }
 
-func setSignature[T System](sm *SystemManager, signature Signature) {
-	name := reflect.TypeOf((*T)(nil)).Elem().String()
+func (sm *SystemManager) SetSystemSignature(s System, signature Signature) {
+	name := reflect.TypeOf(s).String()
 	sm.signatures[name] = signature
 }
 
