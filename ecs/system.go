@@ -56,6 +56,7 @@ func (sm *SystemManager) SetSystemSignature(s System, signature Signature) {
 
 func (sm *SystemManager) EntityDestroyed(entity Entity) {
 	for _, system := range sm.systems {
+		// TODO: check signature
 		system.Remove(entity)
 	}
 }

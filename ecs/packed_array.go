@@ -1,5 +1,9 @@
 package ecs
 
+import (
+	"reflect"
+)
+
 // TODO: entity destroyed event system
 // TODO: consider component array sizes
 
@@ -31,7 +35,10 @@ func (ca *ComponentArray[T]) Insert(entity Entity, component T) {
 
 func (ca *ComponentArray[T]) Remove(entity Entity) {
 	// Copy element at end into deleted element's place to maintain density
-	indexOfRemovedEntity := ca.entityToIndex[entity]
+	indexOfRemovedEntity, ok := ca.entityToIndex[entity]
+	if !ok {
+		return
+	}
 	indexOfLastElement := ca.size - 1
 
 	ca.array[indexOfRemovedEntity] = ca.array[indexOfLastElement]
@@ -47,8 +54,12 @@ func (ca *ComponentArray[T]) Remove(entity Entity) {
 	ca.size--
 }
 
-func (ca *ComponentArray[T]) Get(entity Entity) T {
-	return ca.array[ca.entityToIndex[entity]]
+func (ca *ComponentArray[T]) GetData(entity Entity) T {
+	index, ok := ca.entityToIndex[entity]
+	if !ok {
+		return reflect.Zero(reflect.TypeOf((*T)(nil)).Elem()).Interface().(T)
+	}
+	return ca.array[index]
 }
 
 func NewComponentArray[T any]() *ComponentArray[T] {

@@ -1,5 +1,9 @@
 package ecs
 
+import (
+	bitmap "asteroids/bits"
+)
+
 // Coordinator is responsible for game world
 type Coordinator struct {
 	componentManager *ComponentManger
@@ -27,7 +31,10 @@ func AddComponent[T any](entity Entity, component T) {
 	signature := engine.entiryManager.GetSignature(entity)
 
 	// calculate updated signature
-	signature |= Signature(getComponentType[T](engine.componentManager))
+	signature = bitmap.SetBit(
+		signature,
+		Signature(getComponentType[T](engine.componentManager)),
+	)
 	engine.entiryManager.SetSignature(entity, signature)
 
 	// notify systems about changed signature
@@ -40,7 +47,10 @@ func RemoveComponent[T any](entity Entity) {
 	signature := engine.entiryManager.GetSignature(entity)
 
 	// calculate updated signature
-	signature |= Signature(getComponentType[T](engine.componentManager))
+	signature = bitmap.SetBit(
+		signature,
+		Signature(getComponentType[T](engine.componentManager)),
+	)
 	engine.entiryManager.SetSignature(entity, signature)
 
 	// notify systems about changed signature

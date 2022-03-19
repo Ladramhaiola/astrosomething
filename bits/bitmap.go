@@ -6,18 +6,18 @@ import (
 
 type Bits constraints.Unsigned
 
-func SetBit[T Bits](b, flag T) T {
-	return b | flag
+func SetBit[T Bits](b, pos T) T {
+	return b | (1 << pos)
 }
 
-func ClearBit[T Bits](b, flag T) T {
-	return b &^ flag
+func ClearBit[T Bits](b, pos T) T {
+	return b &^ (1 << pos)
 }
 
-func ToggleBit[T Bits](b, flag T) T {
-	return b ^ flag
+func ToggleBit[T Bits](b, pos T) T {
+	return b ^ (1 << pos)
 }
 
-func HasBit[T Bits](b, flag T) bool {
-	return b&flag != 0
+func HasBit[T Bits](b, pos T) bool {
+	return b&(1<<pos) != 0
 }

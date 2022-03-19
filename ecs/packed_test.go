@@ -16,11 +16,11 @@ func TestPackedArray(t *testing.T) {
 	ca.Insert(b, 2)
 	ca.Insert(c, 3)
 
-	assert.Equal(t, 1, ca.Get(a))
-	assert.Equal(t, 3, ca.Get(c))
+	assert.Equal(t, 1, ca.GetData(a))
+	assert.Equal(t, 3, ca.GetData(c))
 
 	ca.Remove(b)
 
 	ca.Insert(b, 10)
-	assert.Equal(t, 10, ca.Get(b))
+	assert.Equal(t, 10, ca.GetData(b))
 }

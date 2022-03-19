@@ -61,7 +61,7 @@ func removeComponent[T any](cm *ComponentManger, entity Entity) {
 
 func getComponent[T any](cm *ComponentManger, entity Entity) T {
 	// Get a reference to a component from the array for an entity
-	return getComponentArray[T](cm).Get(entity)
+	return getComponentArray[T](cm).GetData(entity)
 }
 
 func getComponentArray[T any](cm *ComponentManger) *ComponentArray[T] {
