@@ -2,8 +2,9 @@ package ecs_test
 
 import (
 	"asteroids/ecs"
-	"fmt"
 	"testing"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // TODO: API improvements & Rendering API & priority queue & parallel systems
@@ -22,7 +23,9 @@ type Acceleration struct {
 	Speed int
 }
 
-type Sprite struct{}
+type Sprite struct {
+	Image *ebiten.Image
+}
 
 type PhysicsSystem struct{ *ecs.BaseSystem }
 
@@ -36,14 +39,21 @@ func (s *PhysicsSystem) Update() {
 	}
 }
 
+func (s *PhysicsSystem) Render(_ *ebiten.Image) {}
+
 type RenderSystem struct{ *ecs.BaseSystem }
 
-func (s *RenderSystem) Update() {
+func (s *RenderSystem) Update() {}
+
+func (s *RenderSystem) Render(dest *ebiten.Image) {
 	for entity := range s.BaseSystem.Entities {
 		position := ecs.GetComponent[*Position](entity)
-		_ = ecs.GetComponent[*Sprite](entity)
+		sprite := ecs.GetComponent[*Sprite](entity)
 
-		fmt.Printf("drawing sprite at %v\n", position)
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(position.X, position.Y)
+
+		dest.DrawImage(sprite.Image, op)
 	}
 }
 
@@ -81,10 +91,10 @@ func TestEngine(t *testing.T) {
 		ecs.AddComponent(entity, &Acceleration{Angle: 32, Speed: 200})
 
 		if i%2 == 0 {
-			ecs.AddComponent(entity, &Sprite{})
+			ecs.AddComponent(entity, &Sprite{Image: ebiten.NewImage(2, 2)})
 		}
 	}
 
 	physicsSystem.Update()
-	renderSystem.Update()
+	renderSystem.Render(ebiten.NewImage(100, 100))
 }

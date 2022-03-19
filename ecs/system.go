@@ -2,6 +2,8 @@ package ecs
 
 import (
 	"reflect"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type BaseSystem struct {
@@ -24,6 +26,7 @@ func (s *BaseSystem) Remove(entiry Entity) {
 
 type System interface {
 	Update()
+	Render(*ebiten.Image)
 
 	Insert(Entity)
 	Remove(Entity)

@@ -1,6 +1,10 @@
 package ecs
 
-import bitmap "asteroids/bits"
+import (
+	bitmap "asteroids/bits"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 // global engine
 var engine = NewCoordinator()
@@ -22,4 +26,21 @@ func SignatureFromComponentTypes(types ...ComponentType) Signature {
 		signature = bitmap.SetBit(signature, Signature(t))
 	}
 	return signature
+}
+
+func Update() {
+	// TODO: separate renderable & updatable?
+	for _, system := range engine.systemManager.systems {
+		system.Update()
+	}
+}
+
+func Draw(screen *ebiten.Image) {
+	for _, system := range engine.systemManager.systems {
+		system.Render(screen)
+	}
+}
+
+func Layout(outsideWidth, outsideHeight int) (int, int) {
+	return ebiten.WindowSize()
 }
