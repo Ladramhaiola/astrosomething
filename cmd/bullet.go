@@ -22,6 +22,8 @@ func NewBullet(x, y, angle float64) ecs.Entity {
 		X: math.Cos(angle) * speed,
 		Y: math.Sin(angle) * speed,
 	})
+	ecs.AddComponent(bullet, &Size{Radius: 3})
+	ecs.AddComponent(bullet, &Collidable{Mask: MaskBullet})
 
 	// render bullet sprite
 	dc := gg.NewContext(6, 6)

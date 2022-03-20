@@ -24,6 +24,7 @@ func NewShipEntity() ecs.Entity {
 		Height: 60,
 		Radius: 30,
 	})
+	ecs.AddComponent(ship, &Collidable{Mask: MaskShip})
 
 	ecs.AddComponent(ship, &UserControl{
 		ShootDelay: 0.3,
