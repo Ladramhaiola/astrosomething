@@ -8,6 +8,21 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+var shipImage = func() *ebiten.Image {
+	// render ship
+	dc := gg.NewContext(60, 60)
+	dc.MoveTo(30, 0)
+	dc.LineTo(60, 60)
+	dc.LineTo(30, 40)
+	dc.LineTo(0, 60)
+	dc.ClosePath()
+	dc.SetRGB(1, 1, 1)
+	dc.SetLineWidth(2)
+	dc.Stroke()
+
+	return ebiten.NewImageFromImage(dc.Image())
+}()
+
 func NewShipEntity() ecs.Entity {
 	ship := ecs.CreateEntity()
 
@@ -27,23 +42,11 @@ func NewShipEntity() ecs.Entity {
 	ecs.AddComponent(ship, &Collidable{Mask: MaskShip})
 
 	ecs.AddComponent(ship, &UserControl{
+		ShootTimer: 0,
 		ShootDelay: 0.3,
 	})
 
-	// render ship
-	dc := gg.NewContext(60, 60)
-	dc.MoveTo(30, 0)
-	dc.LineTo(60, 60)
-	dc.LineTo(30, 40)
-	dc.LineTo(0, 60)
-	dc.ClosePath()
-	dc.SetRGB(1, 1, 1)
-	dc.SetLineWidth(2)
-	dc.Stroke()
-
-	ecs.AddComponent(ship, &Sprite{
-		Image: ebiten.NewImageFromImage(dc.Image()),
-	})
+	ecs.AddComponent(ship, &Sprite{Image: shipImage})
 
 	return ship
 }

@@ -48,8 +48,10 @@ type (
 
 	Sprite struct{ Image *ebiten.Image }
 
-	Lifetime struct{ Time float64 }
+	Lifetime  struct{ Time float64 }
+	OnDestroy func() error
 
+	// TODO: classify entites somehow
 	Collidable struct{ Mask CollisionMask }
 
 	Damageable struct {
@@ -88,6 +90,7 @@ func main() {
 	ecs.RegisterComponent[*Lifetime]()
 	ecs.RegisterComponent[*Collidable]()
 	ecs.RegisterComponent[*Damageable]()
+	ecs.RegisterComponent[OnDestroy]()
 
 	NewPositionSystem()
 	NewUserInputSystem()

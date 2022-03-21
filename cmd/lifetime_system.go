@@ -2,6 +2,7 @@ package main
 
 import (
 	"asteroids/ecs"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -22,10 +23,20 @@ func (s *LifetimeSystem) Update() {
 		lifetime.Time -= 1 / 60.
 
 		if lifetime.Time <= 0 {
-			// TODO: destroy hook or something
-			ecs.DestroyEntity(e)
+			destroyEntity(e)
 		}
 	}
 }
 
 func (s *LifetimeSystem) Render(_ *ebiten.Image) {}
+
+func destroyEntity(e ecs.Entity) {
+	destroyHook := ecs.GetComponent[OnDestroy](e)
+	if destroyHook != nil {
+		if err := destroyHook(); err != nil {
+			log.Printf("[ERRO] destroy hook failed(%d): %s\n", e, err)
+		}
+	}
+
+	ecs.DestroyEntity(e)
+}

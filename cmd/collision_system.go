@@ -28,8 +28,8 @@ func (s *CollisionSystem) Update() {
 
 		if c.Mask == MaskAsteroid {
 			var (
-				asteroidPos  = ecs.GetComponent[*Transform](e)
-				asteroidSize = ecs.GetComponent[*Size](e)
+				pos  = ecs.GetComponent[*Transform](e)
+				size = ecs.GetComponent[*Size](e)
 			)
 
 			for other := range s.Entities {
@@ -42,7 +42,7 @@ func (s *CollisionSystem) Update() {
 				otherPos := ecs.GetComponent[*Transform](other)
 				otherSize := ecs.GetComponent[*Size](other)
 				if !collide(
-					asteroidPos.X, asteroidPos.Y, asteroidSize.Radius,
+					pos.X, pos.Y, size.Radius,
 					otherPos.X, otherPos.Y, otherSize.Radius,
 				) {
 					continue
@@ -50,13 +50,13 @@ func (s *CollisionSystem) Update() {
 
 				// collision happens
 				if otherMask.Mask == MaskBullet {
-					ecs.DestroyEntity(other)
+					destroyEntity(other)
 
 					health := ecs.GetComponent[*Damageable](e)
 					health.CurHitPoints -= 1
 
 					if health.CurHitPoints <= 0 {
-						ecs.DestroyEntity(e)
+						destroyEntity(e)
 					}
 				}
 			}

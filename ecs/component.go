@@ -8,7 +8,7 @@ import (
 
 // TODO: unit tests
 // TODO: better interface
-type PackedArray interface {
+type RemovableArray interface {
 	Remove(entity Entity)
 }
 
@@ -17,7 +17,7 @@ type ComponentManger struct {
 	// Map from type string pointer to a component type
 	componentTypes map[string]ComponentType
 	// Map from type string pointer to a component array
-	componentArrays map[string]PackedArray
+	componentArrays map[string]RemovableArray
 	// The component type to be assigned to the next registered component - starting at 0
 	nextComponentType ComponentType
 }
@@ -83,7 +83,7 @@ func (cm *ComponentManger) EntityDestroyed(entity Entity) {
 func NewComponentManager() *ComponentManger {
 	return &ComponentManger{
 		componentTypes:    make(map[string]ComponentType),
-		componentArrays:   make(map[string]PackedArray, MaxComponents),
+		componentArrays:   make(map[string]RemovableArray, MaxComponents),
 		nextComponentType: 1,
 	}
 }
