@@ -34,6 +34,7 @@ func NewAsteroid(x, y float64, size int) ecs.Entity {
 		Y: float64(vy),
 	})
 
+	// TODO: randomize asteroid sprite
 	// draw sprite
 	dc := gg.NewContext(radius*2, radius*2)
 	dc.DrawCircle(float64(radius), float64(radius), float64(radius-3))
@@ -44,6 +45,25 @@ func NewAsteroid(x, y float64, size int) ecs.Entity {
 	ecs.AddComponent(a, &Sprite{
 		Image: ebiten.NewImageFromImage(dc.Image()),
 	})
+
+	// spawn smaller asteroids
+	ecs.AddComponent(a, OnDestroy(func() error {
+		trans := ecs.GetComponent[*Transform](a)
+
+		if size > 1 {
+			r := rand.New(rand.NewSource(time.Now().UnixNano()))
+			for i := 0; i <= r.Intn(3); i++ {
+				// random x, y position shift
+				rx := r.Float64() - r.Float64()
+				ry := r.Float64() - r.Float64()
+				rx *= (float64(size) * 3)
+				ry *= (float64(size) * 3)
+
+				NewAsteroid(trans.X+rx, trans.Y+ry, size-1)
+			}
+		}
+		return nil
+	}))
 
 	return a
 }
