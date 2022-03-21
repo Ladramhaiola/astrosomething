@@ -1,8 +1,10 @@
-package main
+package system
 
 import (
-	"asteroids/ecs"
 	"math"
+
+	"asteroids/component"
+	"asteroids/ecs"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -14,18 +16,18 @@ func NewRenderSystem() *RenderSystem {
 	ecs.RegisterSystem(s)
 	// set signature
 	ecs.SetSystemSignature(s, ecs.SignatureFromComponentTypes(
-		ecs.GetComponentType[*Transform](),
-		ecs.GetComponentType[*Sprite](),
+		ecs.GetComponentType[*component.Transform](),
+		ecs.GetComponentType[*component.Sprite](),
 	))
 	return s
 }
 
-func (s *RenderSystem) Update() {}
+func (RenderSystem) Update() {}
 
 func (s *RenderSystem) Render(screen *ebiten.Image) {
 	for e := range s.Entities {
-		pos := ecs.GetComponent[*Transform](e)
-		sprite := ecs.GetComponent[*Sprite](e)
+		pos := ecs.GetComponent[*component.Transform](e)
+		sprite := ecs.GetComponent[*component.Sprite](e)
 
 		op := ebiten.DrawImageOptions{}
 

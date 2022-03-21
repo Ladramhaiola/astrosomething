@@ -10,7 +10,7 @@ type EventManager struct {
 	listeners map[EventType][]func(Event)
 }
 
-// TODO: remove listener
+// TODO: remove listener & some more complicated ES :)
 func (em *EventManager) AddListener(t EventType, listeners ...func(Event)) {
 	em.listeners[t] = append(em.listeners[t], listeners...)
 }

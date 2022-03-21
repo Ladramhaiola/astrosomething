@@ -1,23 +1,33 @@
-package main
+package system
 
 import (
-	"asteroids/ecs"
 	"fmt"
 	"math"
+
+	"asteroids/component"
+	"asteroids/ecs"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type CollisionSystem struct{ *ecs.BaseSystem }
+const (
+	MaskAsteroid = component.MaskAsteroid
+	MaskBullet   = component.MaskBullet
+	MaskShip     = component.MaskShip
+)
+
+type CollisionSystem struct {
+	*ecs.BaseSystem
+}
 
 func NewCollisionSystem() *CollisionSystem {
 	s := &CollisionSystem{&ecs.BaseSystem{}}
 	ecs.RegisterSystem(s)
 	// set signature
 	ecs.SetSystemSignature(s, ecs.SignatureFromComponentTypes(
-		ecs.GetComponentType[*Collidable](),
-		ecs.GetComponentType[*Transform](),
-		ecs.GetComponentType[*Size](),
+		ecs.GetComponentType[*component.Collidable](),
+		ecs.GetComponentType[*component.Transform](),
+		ecs.GetComponentType[*component.Size](),
 	))
 	return s
 }
@@ -25,23 +35,23 @@ func NewCollisionSystem() *CollisionSystem {
 // TODO: normal collision system :)
 func (s *CollisionSystem) Update() {
 	for e := range s.Entities {
-		c := ecs.GetComponent[*Collidable](e)
+		c := ecs.GetComponent[*component.Collidable](e)
 
 		if c.Mask == MaskAsteroid {
 			var (
-				pos  = ecs.GetComponent[*Transform](e)
-				size = ecs.GetComponent[*Size](e)
+				pos  = ecs.GetComponent[*component.Transform](e)
+				size = ecs.GetComponent[*component.Size](e)
 			)
 
 			for other := range s.Entities {
-				otherMask := ecs.GetComponent[*Collidable](other)
+				otherMask := ecs.GetComponent[*component.Collidable](other)
 
 				if otherMask.Mask != MaskBullet && otherMask.Mask != MaskShip {
 					continue
 				}
 
-				otherPos := ecs.GetComponent[*Transform](other)
-				otherSize := ecs.GetComponent[*Size](other)
+				otherPos := ecs.GetComponent[*component.Transform](other)
+				otherSize := ecs.GetComponent[*component.Size](other)
 				if !collide(
 					pos.X, pos.Y, size.Radius,
 					otherPos.X, otherPos.Y, otherSize.Radius,
@@ -53,7 +63,7 @@ func (s *CollisionSystem) Update() {
 				if otherMask.Mask == MaskBullet {
 					destroyEntity(other)
 
-					health := ecs.GetComponent[*Damageable](e)
+					health := ecs.GetComponent[*component.Damageable](e)
 					health.CurHitPoints -= 1
 
 					if health.CurHitPoints <= 0 {
@@ -69,7 +79,7 @@ func (s *CollisionSystem) Update() {
 	}
 }
 
-func (s *CollisionSystem) Render(_ *ebiten.Image) {}
+func (CollisionSystem) Render(_ *ebiten.Image) {}
 
 func collide(x1, y1, r1, x2, y2, r2 float64) bool {
 	distance := math.Pow(x2-x1, 2) + math.Pow(y2-y1, 2)

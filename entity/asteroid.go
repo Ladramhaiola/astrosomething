@@ -1,9 +1,12 @@
-package main
+package entity
 
 import (
-	"asteroids/ecs"
 	"math/rand"
 	"time"
+
+	"asteroids/component"
+	"asteroids/ecs"
+	"asteroids/events"
 
 	"github.com/fogleman/gg"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,10 +20,11 @@ func NewAsteroid(x, y float64, size int) ecs.Entity {
 	}
 	radius := size * 15
 
-	ecs.AddComponent(a, &Transform{X: x, Y: y})
-	ecs.AddComponent(a, &Size{Radius: float64(radius)})
-	ecs.AddComponent(a, &Collidable{Mask: MaskAsteroid})
-	ecs.AddComponent(a, &Damageable{
+	ecs.AddComponent(a, &component.Transform{X: x, Y: y})
+	ecs.AddComponent(a, component.Clipable{})
+	ecs.AddComponent(a, &component.Size{Radius: float64(radius)})
+	ecs.AddComponent(a, &component.Collidable{Mask: component.MaskAsteroid})
+	ecs.AddComponent(a, &component.Damageable{
 		MaxHitPoints: size,
 		CurHitPoints: size,
 	})
@@ -29,7 +33,7 @@ func NewAsteroid(x, y float64, size int) ecs.Entity {
 	vx := r.Intn(21) - r.Intn(21)
 	vy := r.Intn(21) - r.Intn(21)
 
-	ecs.AddComponent(a, &Velocity{
+	ecs.AddComponent(a, &component.Velocity{
 		X: float64(vx),
 		Y: float64(vy),
 	})
@@ -42,15 +46,15 @@ func NewAsteroid(x, y float64, size int) ecs.Entity {
 	dc.SetLineWidth(3)
 	dc.Stroke()
 
-	ecs.AddComponent(a, &Sprite{
+	ecs.AddComponent(a, &component.Sprite{
 		Image: ebiten.NewImageFromImage(dc.Image()),
 	})
 
 	// spawn smaller asteroids
-	ecs.AddComponent(a, OnDestroy(func() error {
-		ecs.SendEvent(AsteroidDestroyedEvent{Size: size})
+	ecs.AddComponent(a, component.OnDestroy(func() error {
+		ecs.SendEvent(events.AsteroidDestroyed{Size: size})
 
-		trans := ecs.GetComponent[*Transform](a)
+		trans := ecs.GetComponent[*component.Transform](a)
 
 		if size > 1 {
 			r := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -67,7 +71,7 @@ func NewAsteroid(x, y float64, size int) ecs.Entity {
 		return nil
 	}))
 
-	ecs.SendEvent(AsteroidSpawnedEvent{})
+	ecs.SendEvent(events.AsteroidSpawned{})
 
 	return a
 }

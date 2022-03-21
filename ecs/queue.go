@@ -2,6 +2,8 @@ package ecs
 
 import "container/list"
 
+// TODO: look for performant queue implementation
+
 // Queue is a queue
 type Queue interface {
 	Front() *list.Element

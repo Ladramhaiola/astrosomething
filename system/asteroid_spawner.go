@@ -1,10 +1,13 @@
-package main
+package system
 
 import (
-	"asteroids/ecs"
 	"fmt"
 	"math/rand"
 	"time"
+
+	"asteroids/ecs"
+	"asteroids/entity"
+	"asteroids/events"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -15,23 +18,25 @@ type AsteroidSpawnerSystem struct {
 	currentCount    int
 	spawnTime       float64 // current time
 	spawnDelay      float64 // between-spawn delay
+	screenHeight    float64
 }
 
-func NewAsteroidSpawnerSystem(spawnDelay float64, maxAllowedCount int) *AsteroidSpawnerSystem {
+func NewAsteroidSpawnerSystem(screenHeight, spawnDelay float64, maxAllowedCount int) *AsteroidSpawnerSystem {
 	s := &AsteroidSpawnerSystem{
 		BaseSystem:      &ecs.BaseSystem{},
 		maxAllowedCount: maxAllowedCount,
 		currentCount:    0,
 		spawnTime:       0,
 		spawnDelay:      2,
+		screenHeight:    screenHeight,
 	}
 
 	ecs.RegisterSystem(s)
 	// listen for events
-	ecs.AddListener(EventTypeAsteroidDestroyed, func(_ ecs.Event) {
+	ecs.AddListener(events.TAsteroidDestroyed, func(_ ecs.Event) {
 		s.currentCount--
 	})
-	ecs.AddListener(EventTypeAsteroidSpawned, func(_ ecs.Event) {
+	ecs.AddListener(events.TAsteroidSpawned, func(_ ecs.Event) {
 		s.currentCount++
 	})
 
@@ -56,7 +61,7 @@ func (s *AsteroidSpawnerSystem) Update() {
 func (s *AsteroidSpawnerSystem) spawn() {
 	fmt.Println(s.currentCount)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	y := r.Float64() * float64(screenHeight)
+	y := r.Float64() * s.screenHeight
 
 	// random size
 	size := r.Intn(5)
@@ -64,7 +69,7 @@ func (s *AsteroidSpawnerSystem) spawn() {
 		size = 2
 	}
 
-	NewAsteroid(0, y, size)
+	entity.NewAsteroid(0, y, size)
 }
 
 func (s *AsteroidSpawnerSystem) Render(_ *ebiten.Image) {}
