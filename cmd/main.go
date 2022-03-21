@@ -3,6 +3,7 @@ package main
 import (
 	"asteroids/ecs"
 	"fmt"
+	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -20,6 +21,15 @@ const (
 	MaskShip
 	MaskBullet
 	MaskAsteroid
+)
+
+var (
+	DefaultColor    = color.RGBA{R: 222, G: 222, B: 222, A: 255}
+	BackgroundColor = color.RGBA{R: 16, G: 16, B: 16, A: 255}
+	AmmoColor       = color.RGBA{R: 123, G: 200, B: 14, A: 255}
+	BoostColor      = color.RGBA{R: 76, G: 195, B: 217, A: 255}
+	HPColor         = color.RGBA{R: 241, G: 103, B: 69, A: 255}
+	SkillPointColor = color.RGBA{R: 255, G: 198, B: 193, A: 255}
 )
 
 // Components
@@ -64,7 +74,9 @@ type (
 // TODO: in a normal way :)
 var playerEntity ecs.Entity
 
-type Game struct{}
+type Game struct {
+	score int
+}
 
 func (Game) Update() error {
 	ecs.Update()
@@ -72,6 +84,8 @@ func (Game) Update() error {
 }
 
 func (Game) Draw(screen *ebiten.Image) {
+	screen.Fill(BackgroundColor)
+
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS()))
 	ecs.Draw(screen)
 }
@@ -81,6 +95,8 @@ func (Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
+	ecs.Preallocate(1000, 100)
+
 	ecs.RegisterComponent[*Transform]()
 	ecs.RegisterComponent[*Velocity]()
 	ecs.RegisterComponent[Acceleration]()
@@ -97,18 +113,23 @@ func main() {
 	NewRenderSystem()
 	NewLifetimeSystem()
 	NewCollisionSystem()
+	NewAsteroidSpawnerSystem(5, 30)
 
-	playerEntity = NewShipEntity()
+	playerEntity = NewShipEntity(300, 300)
 
-	NewAsteroid(100, 400, 5)
-	NewAsteroid(200, 15, 3)
-	NewAsteroid(400, 230, 4)
+	game := &Game{}
+
+	ecs.AddListener(EventTypeAsteroidDestroyed, func(e ecs.Event) {
+		event := e.(AsteroidDestroyedEvent)
+		game.score += event.Size * 100
+		fmt.Println("score:", game.score)
+	})
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Hello, World!")
 	ebiten.SetWindowResizable(true)
 
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	if err := ebiten.RunGame(game); err != nil {
 		log.Fatalln(err)
 	}
 }

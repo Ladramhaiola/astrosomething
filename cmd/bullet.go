@@ -12,7 +12,7 @@ var bulletImage = func() *ebiten.Image {
 	// render bullet sprite
 	dc := gg.NewContext(6, 6)
 	dc.DrawCircle(3, 3, 3)
-	dc.SetRGB(1, 1, 1)
+	dc.SetColor(DefaultColor)
 	dc.Fill()
 
 	return ebiten.NewImageFromImage(dc.Image())
@@ -34,7 +34,6 @@ func NewBullet(x, y, angle float64) ecs.Entity {
 	})
 	ecs.AddComponent(bullet, &Size{Radius: 3})
 	ecs.AddComponent(bullet, &Collidable{Mask: MaskBullet})
-
 	ecs.AddComponent(bullet, &Sprite{Image: bulletImage})
 
 	// suppose this should be configurable

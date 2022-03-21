@@ -29,6 +29,10 @@ func SignatureFromComponentTypes(types ...ComponentType) Signature {
 }
 
 func Update() {
+	// fmt.Printf("[DEBUG] current entities count: %d (signatures: %d)\n",
+	// 	engine.entiryManager.count,
+	// 	len(engine.systemManager.signatures),
+	// )
 	// TODO: separate renderable & updatable?
 	for _, system := range engine.systemManager.systems {
 		system.Update()
@@ -43,4 +47,11 @@ func Draw(screen *ebiten.Image) {
 
 func Layout(outsideWidth, outsideHeight int) (int, int) {
 	return ebiten.WindowSize()
+}
+
+func Preallocate(entities, components int) {
+	MaxEntities = entities
+	MaxComponents = components
+
+	engine = NewCoordinator()
 }

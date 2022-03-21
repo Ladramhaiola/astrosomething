@@ -11,7 +11,7 @@ var bangImage = func() *ebiten.Image {
 	// draw sprite
 	dc := gg.NewContext(8, 8)
 	dc.DrawRectangle(0, 0, 8, 8)
-	dc.SetRGB(1, 0, 0)
+	dc.SetColor(HPColor)
 	dc.Fill()
 
 	return ebiten.NewImageFromImage(dc.Image())

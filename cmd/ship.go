@@ -16,19 +16,19 @@ var shipImage = func() *ebiten.Image {
 	dc.LineTo(30, 40)
 	dc.LineTo(0, 60)
 	dc.ClosePath()
-	dc.SetRGB(1, 1, 1)
+	dc.SetColor(DefaultColor)
 	dc.SetLineWidth(2)
 	dc.Stroke()
 
 	return ebiten.NewImageFromImage(dc.Image())
 }()
 
-func NewShipEntity() ecs.Entity {
+func NewShipEntity(x, y float64) ecs.Entity {
 	ship := ecs.CreateEntity()
 
 	ecs.AddComponent(ship, &Transform{
-		X:        300,
-		Y:        300,
+		X:        x,
+		Y:        y,
 		Angle:    0,
 		Rotation: math.Pi,
 	})

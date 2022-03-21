@@ -9,6 +9,7 @@ type Coordinator struct {
 	componentManager *ComponentManger
 	entiryManager    *EntityManager
 	systemManager    *SystemManager
+	eventManager     *EventManager
 }
 
 func CreateEntity() Entity {
@@ -73,10 +74,19 @@ func SetSystemSignature(s System, signature Signature) {
 	engine.systemManager.SetSystemSignature(s, signature)
 }
 
+func AddListener(t EventType, listeners ...func(Event)) {
+	engine.eventManager.AddListener(t, listeners...)
+}
+
+func SendEvent(event Event) {
+	engine.eventManager.SendEvent(event)
+}
+
 func NewCoordinator() *Coordinator {
 	return &Coordinator{
 		componentManager: NewComponentManager(),
 		entiryManager:    NewEntityManager(),
 		systemManager:    NewSystemManager(),
+		eventManager:     NewEventManager(),
 	}
 }

@@ -7,6 +7,7 @@ type EntityManager struct {
 	count uint  // array of signatures where the index corresponds to the entity ID
 	// total living entities
 	signatures []Signature
+	// TODO: consider types mapping -> entity:type
 }
 
 func (em *EntityManager) CreateEntity() Entity {

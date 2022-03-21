@@ -2,6 +2,7 @@ package main
 
 import (
 	"asteroids/ecs"
+	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -58,6 +59,10 @@ func (s *CollisionSystem) Update() {
 					if health.CurHitPoints <= 0 {
 						destroyEntity(e)
 					}
+				}
+
+				if otherMask.Mask == MaskShip {
+					fmt.Printf("[DEBUG] collision with ship\n")
 				}
 			}
 		}

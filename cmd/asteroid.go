@@ -48,6 +48,8 @@ func NewAsteroid(x, y float64, size int) ecs.Entity {
 
 	// spawn smaller asteroids
 	ecs.AddComponent(a, OnDestroy(func() error {
+		ecs.SendEvent(AsteroidDestroyedEvent{Size: size})
+
 		trans := ecs.GetComponent[*Transform](a)
 
 		if size > 1 {
@@ -64,6 +66,8 @@ func NewAsteroid(x, y float64, size int) ecs.Entity {
 		}
 		return nil
 	}))
+
+	ecs.SendEvent(AsteroidSpawnedEvent{})
 
 	return a
 }
