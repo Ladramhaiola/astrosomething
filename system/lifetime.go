@@ -24,10 +24,10 @@ func NewLifetimeSystem() *LifetimeSystem {
 }
 
 // TODO: dt
-func (s *LifetimeSystem) Update() {
+func (s *LifetimeSystem) Update(dt float64) {
 	for e := range s.Entities {
 		lifetime := ecs.GetComponent[*component.Lifetime](e)
-		lifetime.Time -= 1 / 60.
+		lifetime.Time -= dt
 
 		if lifetime.Time <= 0 {
 			destroyEntity(e)

@@ -31,7 +31,7 @@ func NewClipSystem(width, height float64) *ClipSystem {
 }
 
 // TODO: different clip types
-func (s *ClipSystem) Update() {
+func (s *ClipSystem) Update(_ float64) {
 	for e := range s.Entities {
 		trans := ecs.GetComponent[*component.Transform](e)
 

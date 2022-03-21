@@ -33,7 +33,7 @@ func NewCollisionSystem() *CollisionSystem {
 }
 
 // TODO: normal collision system :)
-func (s *CollisionSystem) Update() {
+func (s *CollisionSystem) Update(_ float64) {
 	for e := range s.Entities {
 		c := ecs.GetComponent[*component.Collidable](e)
 

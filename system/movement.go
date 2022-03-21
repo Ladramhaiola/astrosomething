@@ -22,13 +22,13 @@ func NewMovementSystem() *MovementSystem {
 	return s
 }
 
-func (s *MovementSystem) Update() {
+func (s *MovementSystem) Update(dt float64) {
 	for e := range s.Entities {
 		position := ecs.GetComponent[*component.Transform](e)
 		velocity := ecs.GetComponent[*component.Velocity](e)
 
-		position.X += velocity.X / 60.
-		position.Y += velocity.Y / 60.
+		position.X += velocity.X * dt
+		position.Y += velocity.Y * dt
 	}
 }
 

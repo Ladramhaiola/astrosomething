@@ -13,17 +13,28 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const screenWidth, screenHeight = 800, 600
 
 // Game holds game state
 type Game struct {
+	pause bool
 	score int
 }
 
-func (Game) Update() error {
-	ecs.Update()
+func (g *Game) Update() error {
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		g.pause = !g.pause
+	}
+
+	if g.pause {
+		return nil
+	}
+
+	dt := 1. / float64(ebiten.MaxTPS())
+	ecs.Update(dt)
 	return nil
 }
 

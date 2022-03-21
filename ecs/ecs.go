@@ -28,14 +28,11 @@ func SignatureFromComponentTypes(types ...ComponentType) Signature {
 	return signature
 }
 
-func Update() {
-	// fmt.Printf("[DEBUG] current entities count: %d (signatures: %d)\n",
-	// 	engine.entiryManager.count,
-	// 	len(engine.systemManager.signatures),
-	// )
+func Update(dt float64) {
+	// TODO: ECS debugging
 	// TODO: separate renderable & updatable?
 	for _, system := range engine.systemManager.systems {
-		system.Update()
+		system.Update(dt)
 	}
 }
 

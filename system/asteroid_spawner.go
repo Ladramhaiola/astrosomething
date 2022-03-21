@@ -1,7 +1,6 @@
 package system
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -48,8 +47,8 @@ func NewAsteroidSpawnerSystem(screenHeight, spawnDelay float64, maxAllowedCount 
 	return s
 }
 
-func (s *AsteroidSpawnerSystem) Update() {
-	s.spawnTime -= 1 / 60.
+func (s *AsteroidSpawnerSystem) Update(dt float64) {
+	s.spawnTime -= dt
 
 	if s.spawnTime <= 0 && s.currentCount < s.maxAllowedCount {
 		s.spawnTime = s.spawnDelay
@@ -59,7 +58,6 @@ func (s *AsteroidSpawnerSystem) Update() {
 
 // spawn single asteroid
 func (s *AsteroidSpawnerSystem) spawn() {
-	fmt.Println(s.currentCount)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	y := r.Float64() * s.screenHeight
 

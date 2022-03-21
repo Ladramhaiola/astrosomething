@@ -22,7 +22,7 @@ func NewRenderSystem() *RenderSystem {
 	return s
 }
 
-func (RenderSystem) Update() {}
+func (RenderSystem) Update(_ float64) {}
 
 func (s *RenderSystem) Render(screen *ebiten.Image) {
 	for e := range s.Entities {

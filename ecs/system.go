@@ -25,7 +25,7 @@ func (s *BaseSystem) Remove(entiry Entity) {
 }
 
 type System interface {
-	Update()
+	Update(dt float64)
 	Render(*ebiten.Image)
 
 	Insert(Entity)

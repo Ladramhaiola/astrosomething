@@ -33,7 +33,7 @@ func NewUserInputSystem(userID ecs.Entity) *UserInputSystem {
 	return s
 }
 
-func (s *UserInputSystem) Update() {
+func (s *UserInputSystem) Update(dt float64) {
 	var (
 		trans    = ecs.GetComponent[*component.Transform](s.userEntityID)
 		accel    = ecs.GetComponent[component.Acceleration](s.userEntityID)
@@ -42,7 +42,7 @@ func (s *UserInputSystem) Update() {
 		size     = ecs.GetComponent[*component.Size](s.userEntityID)
 	)
 
-	control.ShootTimer -= 1 / 60.
+	control.ShootTimer -= dt
 
 	// shooting
 	if control.ShootTimer <= 0 {
@@ -57,23 +57,23 @@ func (s *UserInputSystem) Update() {
 
 	// movement
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		trans.Angle += trans.Rotation / 60.
+		trans.Angle += trans.Rotation * dt
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		trans.Angle -= trans.Rotation / 60.
+		trans.Angle -= trans.Rotation * dt
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
 		// acceleration vector
-		vxDt := math.Cos(trans.Angle) * float64(accel/60)
-		vyDt := math.Sin(trans.Angle) * float64(accel/60)
+		vxDt := math.Cos(trans.Angle) * float64(accel) * dt
+		vyDt := math.Sin(trans.Angle) * float64(accel) * dt
 
 		velocity.X += vxDt
 		velocity.Y += vyDt
 	}
 
 	// slowdown
-	velocity.X -= velocity.X / 60.
-	velocity.Y -= velocity.Y / 60.
+	velocity.X -= velocity.X * dt
+	velocity.Y -= velocity.Y * dt
 }
 
 func (UserInputSystem) Render(_ *ebiten.Image) {}

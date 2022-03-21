@@ -29,7 +29,7 @@ type Sprite struct {
 
 type PhysicsSystem struct{ *ecs.BaseSystem }
 
-func (s *PhysicsSystem) Update() {
+func (s *PhysicsSystem) Update(_ float64) {
 	for entity := range s.BaseSystem.Entities {
 		position := ecs.GetComponent[*Position](entity)
 		velocity := ecs.GetComponent[*Velocity](entity)
@@ -43,7 +43,7 @@ func (s *PhysicsSystem) Render(_ *ebiten.Image) {}
 
 type RenderSystem struct{ *ecs.BaseSystem }
 
-func (s *RenderSystem) Update() {}
+func (s *RenderSystem) Update(_ float64) {}
 
 func (s *RenderSystem) Render(dest *ebiten.Image) {
 	for entity := range s.BaseSystem.Entities {
@@ -95,6 +95,6 @@ func TestEngine(t *testing.T) {
 		}
 	}
 
-	physicsSystem.Update()
+	physicsSystem.Update(60.0)
 	renderSystem.Render(ebiten.NewImage(100, 100))
 }
