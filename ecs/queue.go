@@ -1,6 +1,8 @@
 package ecs
 
-import "container/list"
+import (
+	"container/list"
+)
 
 // TODO: look for performant queue implementation
 

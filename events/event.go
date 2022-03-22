@@ -5,6 +5,8 @@ import "asteroids/ecs"
 const (
 	TAsteroidDestroyed = iota
 	TAsteroidSpawned
+	TWindowSizeChanged
+	TInitialWindowLoaded
 )
 
 type AsteroidDestroyed struct {
@@ -21,4 +23,20 @@ type AsteroidSpawned struct {
 
 func (AsteroidSpawned) Type() ecs.EventType {
 	return TAsteroidSpawned
+}
+
+type WindowSizeChanged struct {
+	Width, Height int
+}
+
+func (WindowSizeChanged) Type() ecs.EventType {
+	return TWindowSizeChanged
+}
+
+type InitialWindowLoaded struct {
+	Width, Height int
+}
+
+func (InitialWindowLoaded) Type() ecs.EventType {
+	return TInitialWindowLoaded
 }

@@ -42,9 +42,7 @@ func (em *EntityManager) GetSignature(entity Entity) Signature {
 func NewEntityManager() *EntityManager {
 	q := NewQueue()
 
-	// brain dead solution for now
-	// TODO: consider fast queue implementation
-	for i := 0; i <= MaxEntities; i++ {
+	for i := 0; i < MaxEntities; i++ {
 		q.Add(Entity(i))
 	}
 

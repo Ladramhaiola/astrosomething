@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	"asteroids/colors"
 	"asteroids/component"
 	"asteroids/ecs"
-	"asteroids/entity"
 	"asteroids/events"
 	"asteroids/system"
 
@@ -20,11 +20,21 @@ const screenWidth, screenHeight = 800, 600
 
 // Game holds game state
 type Game struct {
+	once  sync.Once
 	pause bool
 	score int
 }
 
 func (g *Game) Update() error {
+	g.once.Do(func() {
+		// do system's setup here
+		w, h := ebiten.WindowSize()
+		ecs.SendEvent(events.InitialWindowLoaded{
+			Width:  w,
+			Height: h,
+		})
+	})
+
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		g.pause = !g.pause
 	}
@@ -70,9 +80,7 @@ func main() {
 	system.NewLifetimeSystem()
 	system.NewAsteroidSpawnerSystem(screenHeight, 3, 20)
 	system.NewRenderSystem()
-
-	player := entity.NewShipEntity(screenWidth/2, screenHeight/2)
-	system.NewUserInputSystem(ecs.Entity(player))
+	system.NewUserInputSystem()
 
 	game := &Game{}
 
@@ -83,6 +91,8 @@ func main() {
 	})
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetFullscreen(true)
+	ebiten.SetInitFocused(true)
 	ebiten.SetWindowTitle("AstroPepega")
 	ebiten.SetWindowResizable(true)
 

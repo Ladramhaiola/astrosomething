@@ -6,6 +6,7 @@ import (
 	"asteroids/component"
 	"asteroids/ecs"
 	"asteroids/entity"
+	"asteroids/events"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -15,21 +16,34 @@ type UserInputSystem struct {
 	userEntityID ecs.Entity
 }
 
-func NewUserInputSystem(userID ecs.Entity) *UserInputSystem {
+func NewUserInputSystem() *UserInputSystem {
 	s := &UserInputSystem{
-		BaseSystem:   &ecs.BaseSystem{},
-		userEntityID: userID,
+		BaseSystem: &ecs.BaseSystem{},
 	}
-	ecs.RegisterSystem(s)
-	// set signature
-	ecs.SetSystemSignature(s, ecs.SignatureFromComponentTypes(
-		ecs.GetComponentType[*component.Transform](),
-		ecs.GetComponentType[*component.Velocity](),
-		ecs.GetComponentType[component.Acceleration](),
-		ecs.GetComponentType[*component.Size](),
-		ecs.GetComponentType[*component.UserControl](),
-		ecs.GetComponentType[*component.Sprite](),
-	))
+
+	// wait for window initial size
+	ecs.AddListener(events.TInitialWindowLoaded, func(e ecs.Event) {
+		event := e.(events.InitialWindowLoaded)
+
+		player := entity.NewShipEntity(
+			float64(event.Width)/2,
+			float64(event.Height)/2,
+		)
+		// set player entity
+		s.userEntityID = player
+
+		ecs.RegisterSystem(s)
+		// set signature
+		ecs.SetSystemSignature(s, ecs.SignatureFromComponentTypes(
+			ecs.GetComponentType[*component.Transform](),
+			ecs.GetComponentType[*component.Velocity](),
+			ecs.GetComponentType[component.Acceleration](),
+			ecs.GetComponentType[*component.Size](),
+			ecs.GetComponentType[*component.UserControl](),
+			ecs.GetComponentType[*component.Sprite](),
+		))
+	})
+
 	return s
 }
 
